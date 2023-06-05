@@ -46,8 +46,8 @@ import com.example.hallo.ui.theme.TextWhite
 
 
 @Composable
-fun RegisterScreen(
-    navigateToLogin: () -> Unit
+fun LoginScreen(
+    navigateToRegister: () -> Unit
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
 
@@ -57,7 +57,7 @@ fun RegisterScreen(
             .background(BackgroundDark)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
+//        verticalArrangement = Arrangement.SpaceBetween
     ) {
         Box(
             modifier = Modifier
@@ -65,7 +65,7 @@ fun RegisterScreen(
             contentAlignment = Alignment.TopCenter
         ) {
             Image(
-                painter = painterResource(R.drawable.register_screen_text_top),
+                painter = painterResource(R.drawable.login_screen_text_top),
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
@@ -114,8 +114,6 @@ fun RegisterScreen(
                 .height(5.dp)
         )
 
-        var firstAndLastName = ""
-        var phoneNumber = ""
         var email = ""
         var password = ""
 
@@ -123,34 +121,6 @@ fun RegisterScreen(
             modifier = Modifier
                 .padding(horizontal = 35.dp)
         ) {
-            InputComponent(
-                input = InputComposable(
-                    label = "First and Last name",
-                    placeholder = "eg. John Doe",
-                    keyboardType = KeyboardType.Text,
-                    onChange = {firstAndLastName = it}
-                )
-            )
-
-            Spacer(
-                modifier = Modifier
-                    .height(15.dp)
-            )
-
-            InputComponent(
-                input = InputComposable(
-                    label = "Phone Number",
-                    placeholder = "eg. 064 897 1069",
-                    keyboardType = KeyboardType.Phone,
-                    onChange = {phoneNumber = it}
-                )
-            )
-
-            Spacer(
-                modifier = Modifier
-                    .height(15.dp)
-            )
-
             InputComponent(
                 input = InputComposable(
                     label = "Email Address",
@@ -170,17 +140,16 @@ fun RegisterScreen(
                     label = "Password",
                     placeholder = "eg. johndoe123",
                     keyboardType = KeyboardType.Password,
-                    isPasswordField = true,
-                    onChange = {password = it}
+                    onChange = {password = it},
+                    isPasswordField = true
                 )
             )
         }
 
         Spacer(
             modifier = Modifier
-                .fillMaxWidth()
                 .height(30.dp)
-//                .weight(1f, true)
+                .weight(1f, true)
         )
 
         Column(
@@ -192,7 +161,9 @@ fun RegisterScreen(
 
             ButtonComponent(
                 button = ButtonComposable(
-                    label = "Sign Up"
+                    label = "Log In",
+                    borderColor = PrimaryPink,
+                    textColor = PrimaryPink
                 )
             )
 
@@ -200,18 +171,18 @@ fun RegisterScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Already have an account?",
+                    text = "Don't have an account?",
                     color = TextNonActive,
                     fontSize = 12.sp,
                     fontStyle = FontStyle.Italic
                 )
 
                 TextButton(
-                    onClick = {navigateToLogin.invoke()}
+                    onClick = {navigateToRegister.invoke()}
                 ) {
                     Text(
-                        text = "Log in",
-                        color = PrimaryPink
+                        text = "Sign up",
+                        color = TextBlue
                     )
                 }
             }

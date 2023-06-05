@@ -2,4 +2,5 @@
     <string name="app_name">hallo</string>
     <string name="title_activity_test_screen">TestScreen</string>
     <string name="title_activity_register_screen">RegisterScreen</string>
+    <string name="title_activity_login_screen">LoginScreen</string>
 </resources>
