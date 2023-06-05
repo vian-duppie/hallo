@@ -11,6 +11,7 @@ val TextNonActive = Color(0xFFD2D6D9)
 val PrimaryBlue = Color(0xFF4484AB)
 val PrimaryPink = Color(0xFFE53855)
 val PrimaryYellow = Color(0xFFFFB017)
+val SecondaryGreen = Color(0xFF44AB96)
 
 val Purple80 = Color(0xFFD0BCFF)
 val PurpleGrey80 = Color(0xFFCCC2DC)

@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.hallo.ui.TestScreen
 import com.example.hallo.ui.screens.LoginScreen
+import com.example.hallo.ui.screens.ProfileScreen
 import com.example.hallo.ui.screens.RegisterScreen
 
 enum class AuthRoutes {
@@ -16,7 +17,8 @@ enum class AuthRoutes {
 }
 
 enum class Routes {
-    Home
+    Home,
+    Profile
 }
 
 @Composable
@@ -25,7 +27,7 @@ fun Navigation(
 ) {
     NavHost(
         navController = navController,
-        startDestination = AuthRoutes.Register.name
+        startDestination = Routes.Profile.name
     ) {
         composable(
             route = AuthRoutes.Register.name
@@ -57,6 +59,12 @@ fun Navigation(
                     }
                 }
             )
+        }
+
+        composable(
+            route = Routes.Profile.name
+        ) {
+            ProfileScreen()
         }
     }
 }
