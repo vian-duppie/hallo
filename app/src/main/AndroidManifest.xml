@@ -13,6 +13,21 @@
         android:theme="@style/Theme.Hallo"
         tools:targetApi="31">
         <activity
+            android:name=".ui.screens.GroupChatsLayout"
+            android:exported="false"
+            android:label="@string/title_activity_group_chats_layout"
+            android:theme="@style/Theme.Hallo" />
+        <activity
+            android:name=".ui.screens.IndividualChatsLayout"
+            android:exported="false"
+            android:label="@string/title_activity_individual_chats_layout"
+            android:theme="@style/Theme.Hallo" />
+        <activity
+            android:name=".ui.screens.ConversationScreen"
+            android:exported="false"
+            android:label="@string/title_activity_conversation_screen"
+            android:theme="@style/Theme.Hallo" />
+        <activity
             android:name=".ui.screens.ProfileScreen"
             android:exported="false"
             android:label="@string/title_activity_profile_screen"

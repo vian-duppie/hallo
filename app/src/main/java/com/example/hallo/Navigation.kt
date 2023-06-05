@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.hallo.ui.TestScreen
+import com.example.hallo.ui.screens.ConversationScreen
 import com.example.hallo.ui.screens.LoginScreen
 import com.example.hallo.ui.screens.ProfileScreen
 import com.example.hallo.ui.screens.RegisterScreen
@@ -17,8 +18,8 @@ enum class AuthRoutes {
 }
 
 enum class Routes {
-    Home,
-    Profile
+    Profile,
+    Conversation
 }
 
 @Composable
@@ -27,7 +28,7 @@ fun Navigation(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Routes.Profile.name
+        startDestination = Routes.Conversation.name
     ) {
         composable(
             route = AuthRoutes.Register.name
@@ -53,7 +54,7 @@ fun Navigation(
                     navController.navigate(AuthRoutes.Register.name) {
                         // If the screen is in the stack it will not be loaded again
                         launchSingleTop = true
-                        popUpTo(route = Routes.Home.name) {
+                        popUpTo(route = AuthRoutes.Register.name) {
                             inclusive = true
                         }
                     }
@@ -65,6 +66,12 @@ fun Navigation(
             route = Routes.Profile.name
         ) {
             ProfileScreen()
+        }
+
+        composable(
+            route = Routes.Conversation.name
+        ) {
+            ConversationScreen()
         }
     }
 }
