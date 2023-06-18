@@ -1,6 +1,7 @@
 package com.example.hallo
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -116,7 +117,16 @@ fun Navigation(
         composable(
             route = Routes.Conversation.name
         ) {
+            LaunchedEffect(key1 = true) {
+                if (!authViewModel.hasUser) {
+                    navController.navigate(AuthRoutes.Login.name) {
+                        popUpTo(navController.graph.startDestinationId)
+                        launchSingleTop = true
+                    }
+                }
+            }
             ConversationScreen(
+
                 navigateToProfile = {
                     navController.navigate(Routes.Profile.name){
                         launchSingleTop = true

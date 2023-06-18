@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.findNavController
 import com.example.hallo.ui.theme.HalloTheme
 import com.example.hallo.viewModels.AuthViewModel
 

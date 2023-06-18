@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -60,6 +61,12 @@ import com.example.hallo.ui.theme.TextWhite
 import com.example.hallo.viewModels.ChatViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
+import com.example.hallo.ui.theme.TextBlue
+import java.text.DateFormat.getDateTimeInstance
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -237,7 +244,10 @@ fun IndividualChatScreen(
                     contentDescription = "Send Icon",
                     tint = TextWhite,
                     modifier = Modifier
-                        .clickable { viewModel.sendNewMessage(newMessage, chatId.toString()) }
+                        .clickable {
+                            viewModel.sendNewMessage(newMessage, chatId.toString())
+                            newMessage = ""
+                        }
                         .size(34.dp)
                 )
             }
@@ -245,8 +255,36 @@ fun IndividualChatScreen(
     }
 }
 
+//@Composable
+//fun MessageFrom(message: Message) {
+//    Column(
+//        modifier = Modifier
+//            .fillMaxWidth(0.7f)
+//            .padding(vertical = 10.dp),
+//        horizontalAlignment = Alignment.Start
+//    ) {
+//        Column(
+//            modifier = Modifier
+//                .border(1.dp, PrimaryBlue, RoundedCornerShape(10.dp))
+//                .padding(12.dp)
+//        ) {
+//            Text(
+//                text = message.message,
+//                color = TextWhite,
+//                fontSize = 12.sp
+//            )
+//        }
+//    }
+//}
+
 @Composable
 fun MessageFrom(message: Message) {
+    val timestamp = message.timestamp
+    val milliseconds = timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000
+    val netDate = Date(milliseconds)
+    val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
+    val time = sdf.format(netDate)
+
     Column(
         modifier = Modifier
             .fillMaxWidth(0.7f)
@@ -264,11 +302,34 @@ fun MessageFrom(message: Message) {
                 fontSize = 12.sp
             )
         }
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = message.from,
+                color = TextBlue,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.width(4.dp))
+
+            Text(
+                text = time,
+                color = TextBlue,
+                fontSize = 12.sp
+            )
+        }
     }
 }
 
 @Composable
 fun MessageTo(message: Message) {
+    val timestamp = message.timestamp
+    val milliseconds = timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000
+    val netDate = Date(milliseconds)
+    val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
+    val date = sdf.format(netDate)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -283,48 +344,23 @@ fun MessageTo(message: Message) {
             Column(
                 modifier = Modifier
                     .border(1.dp, TextWhite, RoundedCornerShape(10.dp))
-                    .padding(12.dp)
+                    .padding(horizontal = 10.dp, vertical = 5.dp),
             ) {
                 Text(
                     text = message.message,
                     color = TextWhite,
-                    fontSize = 12.sp
+                    modifier = Modifier.padding(bottom = 4.dp)
                 )
+
             }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Done,
-                    contentDescription = "Read",
-                    tint = TextWhite
-                )
-
-                val inputTimeStamp = message.timestamp.toDate().toString().split("GMT")[0]
-                val time = inputTimeStamp.substring(inputTimeStamp.length - 6, inputTimeStamp.length)
-
+            Column {
                 Text(
-                    text = time,
-                    color = TextWhite,
+                    text = date,
+                    color = TextBlue,
                     fontSize = 12.sp
                 )
             }
         }
     }
 }
-
-//@Preview(
-//    showSystemUi = true
-//)
-//@Composable
-//fun PreviewRegisterScreen() {
-//    com.example.hallo.ui.theme.HalloTheme {
-//        IndividualChatScreen(
-//            navigateBack = {},
-//            chatId = "chat1234",
-//            title = it.arguments?.getString("title")
-//        )
-//    }
-//}
 

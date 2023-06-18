@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -43,10 +44,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.hallo.R
 import com.example.hallo.models.ChatCardComposable
 import com.example.hallo.ui.composables.ui.theme.HalloTheme
 import com.example.hallo.ui.theme.PrimaryPink
+import com.example.hallo.ui.theme.PrimaryYellow
 import com.example.hallo.ui.theme.TextWhite
 
 @Composable
@@ -71,9 +75,13 @@ fun ChatCard(
             .height(IntrinsicSize.Min)
             .clickable { data.onClick.invoke() }
     ) {
-        Image(
-            painter = painterResource(R.drawable.download),
-            contentDescription = null,
+        AsyncImage(
+            model = ImageRequest.Builder(context = LocalContext.current)
+                .data(data.image)
+                .crossfade(true)
+                .build(),
+            placeholder = painterResource(R.drawable.download),
+            contentDescription = "",
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .height(50.dp)
@@ -131,42 +139,5 @@ fun ChatCard(
             modifier = Modifier
                 .width(20.dp)
         )
-
-        Column(
-            modifier = Modifier
-                .fillMaxHeight(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "10:30",
-                color = TextWhite,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(5.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .aspectRatio(1f)
-                        .width(IntrinsicSize.Min)
-                        .background(PrimaryPink, shape = CircleShape)
-                    ,
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "99+",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Normal,
-                        color = TextWhite,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        }
     }
 }

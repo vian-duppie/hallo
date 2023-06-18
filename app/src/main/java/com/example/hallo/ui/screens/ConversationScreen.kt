@@ -24,6 +24,7 @@ import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,12 +35,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.example.hallo.AuthRoutes
 import com.example.hallo.R
 import com.example.hallo.models.ChatCardComposable
 import com.example.hallo.models.Conversation
 import com.example.hallo.ui.composables.ChatCard
 import com.example.hallo.ui.theme.BackgroundDark
 import com.example.hallo.ui.theme.PrimaryYellow
+import com.example.hallo.viewModels.AuthViewModel
 import com.example.hallo.viewModels.ChatViewModel
 import com.example.hallo.viewModels.ConversationsViewModel
 import com.example.hallo.viewModels.ProfileViewModel
@@ -50,7 +53,7 @@ fun ConversationScreen(
     navigateToChat: (String, String) -> Unit,
     viewModel: ConversationsViewModel = viewModel(),
     profileViewModel: ProfileViewModel = viewModel(),
-    chatViewModel: ChatViewModel = viewModel()
+    chatViewModel: ChatViewModel = viewModel(),
 ) {
     val profileUiState = profileViewModel.profileUiState
     val allConversations = viewModel.convoList ?: listOf<Conversation>()
@@ -60,6 +63,8 @@ fun ConversationScreen(
         viewModel.getConversations()
         onDispose {  }
     }
+
+
 
 
     Column(
@@ -170,6 +175,7 @@ fun ConversationScreen(
             items(allConversations) { conversation ->
                 ChatCard(
                     ChatCardComposable(
+                        image = conversation.image,
                         title = conversation.title,
                         onClick = {navigateToChat.invoke(conversation.id, conversation.title)},
                         last_message = conversation.last_message,
