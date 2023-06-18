@@ -22,11 +22,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.KeyboardType
@@ -43,12 +45,21 @@ import com.example.hallo.ui.theme.PrimaryPink
 import com.example.hallo.ui.theme.TextBlue
 import com.example.hallo.ui.theme.TextNonActive
 import com.example.hallo.ui.theme.TextWhite
+import com.example.hallo.viewModels.AuthViewModel
 
 
 @Composable
 fun RegisterScreen(
-    navigateToLogin: () -> Unit
+    navigateToLogin: () -> Unit,
+    navigateToConversation:() -> Unit,
+    authViewModel: AuthViewModel,
+
 ) {
+    // Get values from ViewModel
+    val authUiState = authViewModel?.authUiState
+    val error = authUiState?.errorMessage != null
+    val context = LocalContext.current
+
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
 
     Column(
@@ -114,22 +125,25 @@ fun RegisterScreen(
                 .height(5.dp)
         )
 
-        var firstAndLastName = ""
-        var phoneNumber = ""
-        var email = ""
-        var password = ""
-
         Column(
             modifier = Modifier
                 .padding(horizontal = 35.dp)
         ) {
-            InputComponent(
-                input = InputComposable(
-                    label = "First and Last name",
-                    placeholder = "eg. John Doe",
-                    keyboardType = KeyboardType.Text,
-                    onChange = {firstAndLastName = it}
+            if (authUiState != null) {
+                InputComponent(
+                    input = InputComposable(
+                        label = "First and Last name",
+                        placeholder = "eg. John Doe",
+                        keyboardType = KeyboardType.Text,
+                        onChange = { authViewModel.handleInputStateChanges("registerUsername", it) },
+                        value = authUiState.registerUsername
+                    )
                 )
+            }
+
+            Spacer(
+                modifier = Modifier
+                    .height(15.dp)
             )
 
             Spacer(
@@ -137,43 +151,35 @@ fun RegisterScreen(
                     .height(15.dp)
             )
 
-            InputComponent(
-                input = InputComposable(
-                    label = "Phone Number",
-                    placeholder = "eg. 064 897 1069",
-                    keyboardType = KeyboardType.Phone,
-                    onChange = {phoneNumber = it}
+            if (authUiState != null) {
+                InputComponent(
+                    input = InputComposable(
+                        label = "Email Address",
+                        placeholder = "eg. johndoe@gmail.com",
+                        keyboardType = KeyboardType.Email,
+                        onChange = {authViewModel.handleInputStateChanges("registerEmail", it)},
+                        value = authUiState.registerEmail
+                    )
                 )
-            )
+            }
 
             Spacer(
                 modifier = Modifier
                     .height(15.dp)
             )
 
-            InputComponent(
-                input = InputComposable(
-                    label = "Email Address",
-                    placeholder = "eg. johndoe@gmail.com",
-                    keyboardType = KeyboardType.Email,
-                    onChange = {email = it}
+            if (authUiState != null) {
+                InputComponent(
+                    input = InputComposable(
+                        label = "Password",
+                        placeholder = "eg. johndoe123",
+                        keyboardType = KeyboardType.Password,
+                        isPasswordField = true,
+                        onChange = {authViewModel.handleInputStateChanges("registerPassword", it)},
+                        value = authUiState.registerPassword
+                    )
                 )
-            )
-
-            Spacer(
-                modifier = Modifier
-                    .height(15.dp)
-            )
-
-            InputComponent(
-                input = InputComposable(
-                    label = "Password",
-                    placeholder = "eg. johndoe123",
-                    keyboardType = KeyboardType.Password,
-                    isPasswordField = true,
-                    onChange = {password = it}
-                )
-            )
+            }
         }
 
         Spacer(
@@ -192,7 +198,8 @@ fun RegisterScreen(
 
             ButtonComponent(
                 button = ButtonComposable(
-                    label = "Sign Up"
+                    label = "Sign Up",
+                    onClick = { authViewModel.createNewUser(context) }
                 )
             )
 
@@ -217,4 +224,13 @@ fun RegisterScreen(
             }
         }
     }
+
+    LaunchedEffect(
+        key1 = authViewModel?.hasUser
+    ) {
+        if(authViewModel?.hasUser == true) {
+            navigateToConversation.invoke()
+        }
+    }
+
 }

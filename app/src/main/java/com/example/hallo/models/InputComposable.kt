@@ -7,5 +7,7 @@ data class InputComposable (
     val onChange: (String) -> Unit = {},
     val keyboardType: KeyboardType = KeyboardType.Text,
     val isPasswordField: Boolean = false,
-    val placeholder: String = "Placeholder"
+    val placeholder: String = "",
+    val value: String = "",
+    val enabled: Boolean = true
 )

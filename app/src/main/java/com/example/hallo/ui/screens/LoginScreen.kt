@@ -1,12 +1,8 @@
 package com.example.hallo.ui.screens
 
-import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,11 +18,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.KeyboardType
@@ -43,13 +40,21 @@ import com.example.hallo.ui.theme.PrimaryPink
 import com.example.hallo.ui.theme.TextBlue
 import com.example.hallo.ui.theme.TextNonActive
 import com.example.hallo.ui.theme.TextWhite
+import com.example.hallo.viewModels.AuthViewModel
 
 
 @Composable
 fun LoginScreen(
+    authViewModel: AuthViewModel? = null,
+    navigateToConversation: () -> Unit,
     navigateToRegister: () -> Unit
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+
+    // Get values from ViewModel
+    val authUiState = authViewModel?.authUiState
+    val error = authUiState?.errorMessage != null
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -121,29 +126,40 @@ fun LoginScreen(
             modifier = Modifier
                 .padding(horizontal = 35.dp)
         ) {
-            InputComponent(
-                input = InputComposable(
-                    label = "Email Address",
-                    placeholder = "eg. johndoe@gmail.com",
-                    keyboardType = KeyboardType.Email,
-                    onChange = {email = it}
+            if (authUiState != null) {
+                InputComponent(
+                    input = InputComposable(
+                        label = "Email Address",
+                        placeholder = "eg. johndoe@gmail.com",
+                        keyboardType = KeyboardType.Email,
+                        onChange = {
+                            authViewModel?.handleInputStateChanges("loginEmail", it)
+                        },
+                        value = authUiState.loginEmail
+                    )
                 )
-            )
+            }
 
             Spacer(
                 modifier = Modifier
                     .height(15.dp)
             )
 
-            InputComponent(
-                input = InputComposable(
-                    label = "Password",
-                    placeholder = "eg. johndoe123",
-                    keyboardType = KeyboardType.Password,
-                    onChange = {password = it},
-                    isPasswordField = true
+            if (authUiState != null) {
+                InputComponent(
+                    input = InputComposable(
+                        label = "Password",
+                        placeholder = "eg. johndoe123",
+                        keyboardType = KeyboardType.Password,
+                        onChange = {
+                            authViewModel?.handleInputStateChanges("loginPassword", it)
+                        },
+        //                    value={ authViewModel?.handleInputStateChanges("loginPassword", it) },
+                        isPasswordField = true,
+                        value = authUiState.loginPassword
+                    )
                 )
-            )
+            }
         }
 
         Spacer(
@@ -161,6 +177,7 @@ fun LoginScreen(
 
             ButtonComponent(
                 button = ButtonComposable(
+                    onClick = { authViewModel?.loginUser(context) },
                     label = "Log In",
                     borderColor = PrimaryPink,
                     textColor = PrimaryPink
@@ -186,6 +203,14 @@ fun LoginScreen(
                     )
                 }
             }
+        }
+    }
+
+    LaunchedEffect(
+        key1 = authViewModel?.hasUser
+    ) {
+        if(authViewModel?.hasUser == true) {
+            navigateToConversation.invoke()
         }
     }
 }

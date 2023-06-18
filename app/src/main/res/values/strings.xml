@@ -7,4 +7,6 @@
     <string name="title_activity_conversation_screen">ConversationScreen</string>
     <string name="title_activity_individual_chats_layout">IndividualChatsLayout</string>
     <string name="title_activity_group_chats_layout">GroupChatsLayout</string>
+    <string name="title_activity_chat_card">ChatCard</string>
+    <string name="title_activity_individual_chat_screen">IndividualChatScreen</string>
 </resources>

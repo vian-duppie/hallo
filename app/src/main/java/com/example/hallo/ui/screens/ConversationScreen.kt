@@ -1,8 +1,11 @@
 package com.example.hallo.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,42 +16,57 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults.containerColor
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.hallo.R
+import com.example.hallo.models.ChatCardComposable
+import com.example.hallo.models.Conversation
+import com.example.hallo.ui.composables.ChatCard
 import com.example.hallo.ui.theme.BackgroundDark
 import com.example.hallo.ui.theme.PrimaryYellow
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.unit.sp
-import com.example.hallo.ui.theme.PrimaryPink
+import com.example.hallo.viewModels.ChatViewModel
+import com.example.hallo.viewModels.ConversationsViewModel
+import com.example.hallo.viewModels.ProfileViewModel
 
 @Composable
-fun ConversationScreen() {
+fun ConversationScreen(
+    navigateToProfile: () -> Unit,
+    navigateToChat: (String, String) -> Unit,
+    viewModel: ConversationsViewModel = viewModel(),
+    profileViewModel: ProfileViewModel = viewModel(),
+    chatViewModel: ChatViewModel = viewModel()
+) {
+    val profileUiState = profileViewModel.profileUiState
+    val allConversations = viewModel.convoList ?: listOf<Conversation>()
+
+    DisposableEffect(Unit) {
+        profileViewModel.getProfileData()
+        viewModel.getConversations()
+        onDispose {  }
+    }
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(BackgroundDark)
-            .padding(vertical = 30.dp),
+            .padding(top = 30.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
@@ -85,14 +103,19 @@ fun ConversationScreen() {
                     .weight(1f)
             )
 
-            Image(
-                painter = painterResource(R.drawable.download),
-                contentDescription = null,
+            AsyncImage(
+                model = ImageRequest.Builder(context = LocalContext.current)
+                    .data(profileUiState.profileImage)
+                    .crossfade(true)
+                    .build(),
+                placeholder = painterResource(R.drawable.download),
+                contentDescription = "",
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
                     .border(1.dp, PrimaryYellow, CircleShape)
+                    .clickable { navigateToProfile.invoke() }
             )
 
             Spacer(
@@ -136,44 +159,23 @@ fun ConversationScreen() {
                 .height(30.dp)
         )
 
-        var tabIndex by remember { mutableStateOf(0) }
-        val tabs = listOf("Chats", "Group")
+        Log.d("AAAAAAAAAAAAAAA", allConversations.toString())
 
-        TabRow(
-            containerColor = Color.Transparent,
-            selectedTabIndex = tabIndex,
-            divider = {},
-            indicator = { tabPositions ->
-                Box(
-                    modifier = Modifier
-                        .tabIndicatorOffset(tabPositions[tabIndex])
-                        .height(2.dp)
-                        .padding(horizontal = 65.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(PrimaryPink)
+        LazyColumn(
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
+                .padding(top = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            items(allConversations) { conversation ->
+                ChatCard(
+                    ChatCardComposable(
+                        title = conversation.title,
+                        onClick = {navigateToChat.invoke(conversation.id, conversation.title)},
+                        last_message = conversation.last_message,
+                    )
                 )
             }
-        ) {
-            tabs.forEachIndexed { index, title ->
-                Tab(
-                    selected = index == tabIndex,
-                    onClick = { tabIndex = index },
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                ) {
-                    Text(
-                        text = title,
-                        style = TextStyle(
-                            color = PrimaryPink,
-                            fontSize = 16.sp
-                        )
-                    )
-                }
-            }
-        }
-        when (tabIndex) {
-            0 -> IndividualChats()
-            1 -> GroupChats()
         }
     }
 }

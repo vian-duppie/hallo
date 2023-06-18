@@ -1,10 +1,16 @@
 package com.example.hallo.ui.screens
 
+import android.net.Uri
 import android.util.Size
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +36,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,10 +48,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.hallo.R
+import com.example.hallo.Services.AuthService
 import com.example.hallo.models.InputComposable
 import com.example.hallo.ui.composables.InputComponent
 import com.example.hallo.ui.theme.BackgroundDark
@@ -50,11 +64,41 @@ import com.example.hallo.ui.theme.PrimaryPink
 import com.example.hallo.ui.theme.SecondaryGreen
 import com.example.hallo.ui.theme.TextWhite
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import com.example.hallo.viewModels.ProfileViewModel
+import com.example.hallo.viewModels.UserViewModel
 
 @Composable
 fun ProfileScreen(
-
+    navigateOnSignOut: () -> Unit,
+    navigateBack: () -> Unit,
+    userViewModel: UserViewModel = viewModel(),
+    profileViewModel: ProfileViewModel = viewModel()
 ) {
+    val profileUiState = profileViewModel.profileUiState
+
+    val user = remember(userViewModel.profile){
+        derivedStateOf{userViewModel.profile}
+    }
+    var pickedImage: Uri? by remember{
+        mutableStateOf(null)
+    }
+
+//    val singlePhotoPicker :ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?> = rememberLauncherForActivityResult(
+//        contract = ActivityResultContracts.PickVisualMedia(),
+//        onResult = { uri -> pickedImage = uri}
+//    )
+
+    val singlePhotoPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = {uri ->
+            if (uri != null) {
+                profileViewModel.handleProfileStateChange(uri)
+            }
+        }
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -73,7 +117,7 @@ fun ProfileScreen(
             )
 
             IconButton(
-                onClick = {}
+                onClick = { navigateBack.invoke() }
             ) {
                 Icon(
                     imageVector = Icons.Outlined.ArrowBack,
@@ -135,14 +179,23 @@ fun ProfileScreen(
                 )
             }
 
-            Image(
-                painter = painterResource(R.drawable.download),
-                contentDescription = "Image",
-                contentScale = ContentScale.Fit,
+            AsyncImage(
+                model = ImageRequest.Builder(context = LocalContext.current)
+                    .data(profileUiState.profileImage ?: "/")
+                    .crossfade(true)
+                    .build(),
+                placeholder = painterResource(R.drawable.download),
+                contentDescription = "",
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(130.dp)
                     .clip(CircleShape)
                     .align(Alignment.Center)
+                    .clickable {
+                        singlePhotoPicker.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    }
             )
 
             Icon(
@@ -166,9 +219,10 @@ fun ProfileScreen(
             InputComponent(
                 input = InputComposable(
                     label = "About",
-                    placeholder = "Available",
+                    placeholder = if(profileUiState.about.isEmpty()) "Enter about" else "",
                     keyboardType = KeyboardType.Text,
-//                    onChange = {email = it}
+                    onChange = {profileViewModel.handleAboutStateChange(it)},
+                    value = profileUiState.about
                 )
             )
 
@@ -180,9 +234,10 @@ fun ProfileScreen(
             InputComponent(
                 input = InputComposable(
                     label = "Username",
-                    placeholder = "Vian du Plessis",
+                    placeholder = if(profileUiState.username.isEmpty()) "Enter username" else "",
                     keyboardType = KeyboardType.Text,
-//                    onChange = {password = it},
+                    onChange = {profileViewModel.handeUsernameStateChange(it)},
+                    value = profileUiState.username
                 )
             )
 
@@ -194,9 +249,11 @@ fun ProfileScreen(
             InputComponent(
                 input = InputComposable(
                     label = "Email",
-                    placeholder = "test@gmail.com",
+                    placeholder =  if(profileUiState.email.isEmpty()) "Enter Email" else "",
                     keyboardType = KeyboardType.Email,
 //                    onChange = {password = it},
+                    value = profileUiState.email,
+                    enabled = false
                 )
             )
         }
@@ -214,51 +271,63 @@ fun ProfileScreen(
             Button(
                 modifier = Modifier
                     .fillMaxWidth(),
-                onClick = { /*TODO*/ },
+                onClick = { profileViewModel.saveProfileData() },
                 colors = ButtonDefaults.textButtonColors(
-                    containerColor = Color.Red
+                    containerColor = PrimaryPink
                 )
             ) {
-                Text(
-                    text = "Logout Profile",
-                    color = TextWhite
-                )
-
-                Spacer(
+                Row(
                     modifier = Modifier
-                        .width(10.dp)
-                )
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Save Info",
+                        color = TextWhite
+                    )
 
-                Icon(
-                    imageVector = Icons.Outlined.ExitToApp,
-                    contentDescription = "Icon",
-                    tint = Color.White,
-                )
+//                    Spacer(
+//                        modifier = Modifier
+//                            .width(10.dp)
+//                    )
+
+//                    Icon(
+//                        imageVector = Icons.Outlined.Se,
+//                        contentDescription = "Icon",
+//                        tint = Color.White,
+//                    )
+                }
             }
 
             Button(
                 modifier = Modifier
                     .fillMaxWidth(),
-                onClick = { /*TODO*/ },
+                onClick = { AuthService().signOutUser(); navigateOnSignOut.invoke() },
                 colors = ButtonDefaults.textButtonColors(
                     containerColor = Color.Red
                 )
             ) {
-                Text(
-                    text = "Delete Account",
-                    color = TextWhite
-                )
-
-                Spacer(
+                Row(
                     modifier = Modifier
-                        .width(10.dp)
-                )
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Logout Profile",
+                        color = TextWhite
+                    )
 
-                Icon(
-                    imageVector = Icons.Outlined.Delete,
-                    contentDescription = "Icon",
-                    tint = Color.White,
-                )
+//                    Spacer(
+//                        modifier = Modifier
+//                            .width(10.dp)
+//                    )
+
+//                    Icon(
+//                        imageVector = Icons.Outlined.ExitToApp,
+//                        contentDescription = "Icon",
+//                        tint = Color.White,
+//                    )
+                }
             }
         }
     }

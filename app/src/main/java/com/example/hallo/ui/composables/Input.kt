@@ -64,7 +64,8 @@ fun InputComponent(
         var isPassword = input.isPasswordField
 
         BasicTextField(
-            value = value,
+            enabled = input.enabled,
+            value = input.value,
             onValueChange = {
                 value = it
                 input.onChange(it)
